@@ -296,7 +296,8 @@ impl pallet_apps::Config for Runtime {
 	type Moment = Moment;
 	type AppTime = Timestamp;
 	type Star = Start;
-	type MaxStar = ConstU8<5>;
+	type NumberLimit = ConstU32<5_u32>;
+	type StringLimit = ConstU32<255_u32>;
 }
 
 
