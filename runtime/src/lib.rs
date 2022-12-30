@@ -50,6 +50,8 @@ pub use sp_runtime::{Perbill, Permill};
 /// Import the template pallet.
 pub use pallet_template;
 
+pub use pallet_apps;
+
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -68,6 +70,14 @@ pub type Index = u32;
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
+
+/// App id
+pub type AppId = u32;
+
+/// Moment
+pub type Moment = u64;
+
+pub type Start = u8;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -234,7 +244,7 @@ impl pallet_grandpa::Config for Runtime {
 
 impl pallet_timestamp::Config for Runtime {
 	/// A timestamp: milliseconds since the unix epoch.
-	type Moment = u64;
+	type Moment = Moment;
 	type OnTimestampSet = Aura;
 	type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
 	type WeightInfo = ();
@@ -280,6 +290,16 @@ impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
 
+impl pallet_apps::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type AppId = AppId;
+	type Moment = Moment;
+	type AppTime = Timestamp;
+	type Star = Start;
+	type MaxStar = ConstU8<5>;
+}
+
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime
@@ -298,6 +318,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		PalletApps: pallet_apps,
 	}
 );
 
