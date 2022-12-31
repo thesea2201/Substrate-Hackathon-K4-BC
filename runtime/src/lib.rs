@@ -77,7 +77,7 @@ pub type AppId = u32;
 /// Moment
 pub type Moment = u64;
 
-pub type Start = u8;
+pub type Star = u32;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -295,9 +295,11 @@ impl pallet_apps::Config for Runtime {
 	type AppId = AppId;
 	type Moment = Moment;
 	type AppTime = Timestamp;
-	type Star = Start;
-	type NumberLimit = ConstU32<5_u32>;
-	type StringLimit = ConstU32<255_u32>;
+	type Star = Star;
+	type AppNameLimit = ConstU32<255_u32>;
+	type AppSymbolLimit = ConstU32<125_u32>;
+	type StarLimit = ConstU32<5_u32>;
+	type AppOwnerLimit = ConstU32<12_u32>;
 }
 
 

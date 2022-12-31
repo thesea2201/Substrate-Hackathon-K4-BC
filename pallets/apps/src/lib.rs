@@ -49,13 +49,21 @@ pub mod pallet {
 			+ Default
 			+ MaxEncodedLen
 			+ MaybeSerializeDeserialize
-			+ Copy;
+			+ Copy
+			+ From<u32>
+			+ PartialOrd;
 
 		#[pallet::constant]
-		type NumberLimit: Get<u32>;
+		type AppOwnerLimit: Get<u32>;
 
 		#[pallet::constant]
-		type StringLimit: Get<u32>;
+		type StarLimit: Get<u32>;
+
+		#[pallet::constant]
+		type AppNameLimit: Get<u32>;
+
+		#[pallet::constant]
+		type AppSymbolLimit: Get<u32>;
 	}
 
 	#[pallet::storage]
@@ -72,13 +80,14 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn app_owner)]
-	pub(super) type AppsOnwer<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<T::Hash, T::NumberLimit>, ValueQuery, >;
+	pub(super) type AppsOnwer<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<T::Hash, T::AppOwnerLimit>, ValueQuery, >;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		AppCreated { app_hash: T::Hash, app_id: T::AppId, who: T::AccountId },
-		
+		AppUpdated { app_hash: T::Hash},
+		AppStarUpdated {app_hash: T::Hash, star: T::Star},
 	}
 
 	#[pallet::error]
@@ -88,6 +97,7 @@ pub mod pallet {
 		AppOwnerLimited,
 		AppNotFound,
 		NotAppOwner,
+		StarLimited,
 	}
 
 	#[pallet::call]
@@ -98,8 +108,8 @@ pub mod pallet {
 
 			let app_id = Self::next_app_id();
 
-			let bounded_name: BoundedVec<u8, T::StringLimit> = name.clone().try_into().expect("app name is too long");
-			let bounded_symbol: BoundedVec<u8, T::StringLimit> = symbol.clone().try_into().expect("app symbol is too long");
+			let bounded_name: BoundedVec<u8, T::AppNameLimit> = name.clone().try_into().expect("app name is too long");
+			let bounded_symbol: BoundedVec<u8, T::AppSymbolLimit> = symbol.clone().try_into().expect("app symbol is too long");
 
 			let app = App::create(app_id, who.clone(), bounded_name, bounded_symbol);
 
@@ -133,11 +143,11 @@ pub mod pallet {
 			let app = <Apps<T>>::get(app_hash.clone()).ok_or(<Error<T>>::AppNotFound)?;
 			
 			// ensure who is app owner
-			ensure!(who == app.owner(), <Error<T>>::NotAppOwner)?;
+			ensure!(who == app.owner(), <Error<T>>::NotAppOwner);
 
 			// ensure name and symbol valid
-			let bounded_name: BoundedVec<u8, T::StringLimit> = name.clone().try_into().expect("app name is too long");
-			let bounded_symbol: BoundedVec<u8, T::StringLimit> = symbol.clone().try_into().expect("app symbol is too long");
+			let bounded_name: BoundedVec<u8, T::AppNameLimit> = name.clone().try_into().expect("app name is too long");
+			let bounded_symbol: BoundedVec<u8, T::AppSymbolLimit> = symbol.clone().try_into().expect("app symbol is too long");
 
 			// change app info
 			<Apps<T>>::try_mutate(&app_hash, |app_option| {
@@ -149,13 +159,29 @@ pub mod pallet {
 				Err(())
 			}).map_err(|_| <Error<T>>::AppNotFound)?;
 
+			Self::deposit_event(Event::AppUpdated {app_hash});
+
 			Ok(())
 		}
 
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1).ref_time())]
-		pub fn vote(origin: OriginFor<T>, app_hash: T::Hash, star: T::Star) -> DispatchResult {
-			let who = ensure_signed(origin)?;
+		pub fn update_star(origin: OriginFor<T>, app_hash: T::Hash, star: T::Star) -> DispatchResult {
+			let _root = ensure_root(origin)?;
 
+			let star_limit = T::StarLimit::get();
+
+			// ensure star less than star limit
+			ensure!(star <= star_limit.into(), <Error<T>>::StarLimited);
+
+			<Apps<T>>::try_mutate(&app_hash, |app_option| {
+				if let Some(app) = app_option {
+					app.set_star(star);
+					return Ok(());
+				}
+				Err(())
+			}).map_err(|_| <Error<T>>::AppNotFound)?;
+
+			Self::deposit_event(Event::AppStarUpdated {app_hash, star});
 
 			Ok(())
 		}

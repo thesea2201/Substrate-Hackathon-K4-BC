@@ -10,8 +10,8 @@ use crate::Config;
 #[scale_info(skip_type_params(T))]
 pub struct App<T: Config> {
     id: T::AppId,
-    name: BoundedVec<u8, T::StringLimit>,
-    symbol: BoundedVec<u8, T::StringLimit>,
+    name: BoundedVec<u8, T::AppNameLimit>,
+    symbol: BoundedVec<u8, T::AppSymbolLimit>,
     owner: T::AccountId,
     created_at: T::Moment,
     star: Option<T::Star>,
@@ -19,7 +19,7 @@ pub struct App<T: Config> {
 
 impl <T: Config> App<T> {
 
-    pub fn create(id: T::AppId, owner: T::AccountId, name: BoundedVec<u8, T::StringLimit>, symbol: BoundedVec<u8, T::StringLimit>) -> Self {
+    pub fn create(id: T::AppId, owner: T::AccountId, name: BoundedVec<u8, T::AppNameLimit>, symbol: BoundedVec<u8, T::AppSymbolLimit>) -> Self {
         let now = T::AppTime::now();
         App { 
             id,
@@ -35,11 +35,11 @@ impl <T: Config> App<T> {
         self.id
     }    
 
-    pub fn name(&self) -> BoundedVec<u8, T::StringLimit> {
+    pub fn name(&self) -> BoundedVec<u8, T::AppNameLimit> {
         self.name.clone()
     }
 
-    pub fn symbol(&self) -> BoundedVec<u8, T::StringLimit> {
+    pub fn symbol(&self) -> BoundedVec<u8, T::AppSymbolLimit> {
         self.symbol.clone()
     }
 
@@ -55,11 +55,15 @@ impl <T: Config> App<T> {
         self.star
     }
 
-    pub fn set_name(&mut self, name: BoundedVec<u8, T::StringLimit>) {
+    pub fn set_name(&mut self, name: BoundedVec<u8, T::AppNameLimit>) {
         self.name = name;
     }
 
-    pub fn set_symbol(&mut self, symbol: BoundedVec<u8, T::StringLimit>) {
+    pub fn set_symbol(&mut self, symbol: BoundedVec<u8, T::AppSymbolLimit>) {
         self.symbol = symbol;
+    }
+
+    pub fn set_star(&mut self, star: T::Star) { 
+        self.star = Some(star);
     }
 }
