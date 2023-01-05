@@ -3722,11 +3722,13 @@ dependencies = [
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
+ "pallet-apps",
  "pallet-aura",
  "pallet-balances",
  "pallet-grandpa",
- "pallet-randomness-collective-flip 4.0.0-dev (git+https://github.com/paritytech/substrate.git)",
  "pallet-reviewers",
+ "pallet-randomness-collective-flip",
+ "pallet-review",
  "pallet-sudo",
  "pallet-template",
  "pallet-timestamp",
@@ -3885,6 +3887,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b7820b9daea5457c9f21c69448905d723fbd21136ccf521748f23fd49e723ee"
 
 [[package]]
+name = "pallet-apps"
+version = "4.0.0-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-aura"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git#2a0eeff4008573f6ead70eb9bd43cf6d268d2e7d"
@@ -3995,6 +4011,21 @@ dependencies = [
  "sp-io 7.0.0 (git+https://github.com/paritytech/substrate.git)",
  "sp-runtime 7.0.0 (git+https://github.com/paritytech/substrate.git)",
  "sp-std 5.0.0 (git+https://github.com/paritytech/substrate.git)",
+]
+
+[[package]]
+name = "pallet-review"
+version = "4.0.0-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
 ]
 
 [[package]]

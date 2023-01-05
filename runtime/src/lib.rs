@@ -47,8 +47,12 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the template pallet.
+/// Import the review pallet.
 pub use pallet_template;
+/// Import the review pallet.
+pub use pallet_review;
+
+pub use pallet_apps;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -68,6 +72,14 @@ pub type Index = u32;
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
+
+/// App id
+pub type AppId = u32;
+
+/// Moment
+pub type Moment = u64;
+
+pub type Star = u32;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -236,7 +248,7 @@ impl pallet_grandpa::Config for Runtime {
 
 impl pallet_timestamp::Config for Runtime {
 	/// A timestamp: milliseconds since the unix epoch.
-	type Moment = u64;
+	type Moment = Moment;
 	type OnTimestampSet = Aura;
 	type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
 	type WeightInfo = ();
@@ -277,7 +289,18 @@ impl pallet_sudo::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 }
 
-/// Configure the pallet-template in pallets/template.
+
+parameter_types! {
+	pub const StarLimit : u32 = 5u32;
+}
+
+parameter_types! {
+	pub const ReviewOwnerLimit : u32 = 10000u32;
+}
+
+parameter_types! {
+	pub const ContentLimit : u32 = 1000000000u32;
+}
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
@@ -288,6 +311,31 @@ impl pallet_reviewers::Config for Runtime {
 	type IdRandom = RandomnessCollectiveFlip;
 	type MaxAccount = MaxAccount;
 }
+
+/// Configure the pallet-review in pallets/review.
+impl pallet_review::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ContentLimit = ContentLimit;
+	type Moment = Moment;
+	type Star = Star;
+	type StarLimit = StarLimit;
+	type AppId = AppId;
+	type ReviewTime = Timestamp;
+	type ReviewOwnerLimit = ReviewOwnerLimit;
+}
+
+impl pallet_apps::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type AppId = AppId;
+	type Moment = Moment;
+	type AppTime = Timestamp;
+	type Star = Star;
+	type AppNameLimit = ConstU32<255_u32>;
+	type AppSymbolLimit = ConstU32<125_u32>;
+	type StarLimit = ConstU32<5_u32>;
+	type AppOwnerLimit = ConstU32<12_u32>;
+}
+
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -308,6 +356,9 @@ construct_runtime!(
 		Reviewers: pallet_reviewers,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		PalletApps: pallet_apps,
+		// Include the custom logic from the pallet-review in the runtime.
+		ReviewModule: pallet_review,
 	}
 );
 
@@ -354,7 +405,7 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
-		[pallet_template, TemplateModule]
+		[pallet_review, ReviewModule]
 	);
 }
 
