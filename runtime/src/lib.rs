@@ -47,8 +47,10 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the template pallet.
+/// Import the review pallet.
 pub use pallet_template;
+/// Import the review pallet.
+pub use pallet_review;
 
 pub use pallet_apps;
 
@@ -285,9 +287,32 @@ impl pallet_sudo::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 }
 
-/// Configure the pallet-template in pallets/template.
+
+parameter_types! {
+	pub const StarLimit : u32 = 5u32;
+}
+
+parameter_types! {
+	pub const ReviewOwnerLimit : u32 = 10000u32;
+}
+
+parameter_types! {
+	pub const ContentLimit : u32 = 1000000000u32;
+}
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+}
+
+/// Configure the pallet-review in pallets/review.
+impl pallet_review::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ContentLimit = ContentLimit;
+	type Moment = Moment;
+	type Star = Star;
+	type StarLimit = StarLimit;
+	type AppId = AppId;
+	type ReviewTime = Timestamp;
+	type ReviewOwnerLimit = ReviewOwnerLimit;
 }
 
 impl pallet_apps::Config for Runtime {
@@ -322,6 +347,8 @@ construct_runtime!(
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 		PalletApps: pallet_apps,
+		// Include the custom logic from the pallet-review in the runtime.
+		ReviewModule: pallet_review,
 	}
 );
 
@@ -368,7 +395,7 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
-		[pallet_template, TemplateModule]
+		[pallet_review, ReviewModule]
 	);
 }
 
