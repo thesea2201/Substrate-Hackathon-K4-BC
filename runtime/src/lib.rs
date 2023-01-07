@@ -299,6 +299,10 @@ parameter_types! {
 }
 
 parameter_types! {
+	pub const ReviewOwnerByAppLimit : u32 = 10000u32;
+}
+
+parameter_types! {
 	pub const ContentLimit : u32 = 1000000000u32;
 }
 impl pallet_template::Config for Runtime {
@@ -317,11 +321,12 @@ impl pallet_review::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ContentLimit = ContentLimit;
 	type Moment = Moment;
-	type Star = Star;
-	type StarLimit = StarLimit;
+	// type Star = Star;
+	// type StarLimit = StarLimit;
 	type AppId = AppId;
 	type ReviewTime = Timestamp;
 	type ReviewOwnerLimit = ReviewOwnerLimit;
+	type ReviewOwnerByAppLimit = ReviewOwnerByAppLimit;
 }
 
 impl pallet_apps::Config for Runtime {
