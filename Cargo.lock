@@ -3903,6 +3903,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "pallet-apps",
  "parity-scale-codec",
  "scale-info",
  "serde",
